@@ -1,0 +1,128 @@
+@import "tailwindcss";
+
+/* Wecare Custom Theme Tokens */
+@theme {
+    --color-wecare-blue: #3492ab;
+    --color-wecare-lightBlue: #7FBACB;
+    --color-wecare-paleBlue: #C5E0E8;
+    --color-wecare-darkBlue: #236E84;
+    --color-wecare-deepBlue: #164553;
+    --color-wecare-green: #4CAF50;
+    --color-wecare-offWhite: #F8F9FA;
+    --color-wecare-lightGrey: #E9ECEF;
+    --color-wecare-mediumGrey: #6C757D;
+    --color-wecare-charcoal: #343A40;
+
+    --font-lexend: 'Lexend', sans-serif;
+    --font-roboto: 'Roboto', sans-serif;
+}
+
+/* Base Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #2b2b2b;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* Hide ALL scrollbars globally — keep scroll functionality */
+*::-webkit-scrollbar {
+    display: none;
+}
+
+* {
+    scrollbar-width: none;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Lexend', sans-serif;
+}
+
+/* Custom Scrollbar for TOC */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #3492ab;
+}
+
+/* Subtle noise texture overlay for premium feel */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Page hover glow effect */
+.demo-book .stf__item {
+    transition: box-shadow 0.3s ease;
+}
+
+.demo-book .stf__item:hover {
+    box-shadow: 0 8px 32px rgba(52, 146, 171, 0.12);
+}
+
+/* Print Styles */
+@media print {
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    body {
+        background-color: white !important;
+        color: black !important;
+        overflow: visible !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    #root {
+        height: auto !important;
+        width: 100% !important;
+    }
+
+    .print\:block {
+        display: block !important;
+    }
+
+    .print\:hidden {
+        display: none !important;
+    }
+
+    div[style*="transform"] {
+        position: relative !important;
+    }
+
+    .print\:columns-2 {
+        column-count: 2 !important;
+    }
+
+    .page-break-after-always {
+        break-after: page;
+        page-break-after: always;
+    }
+
+    img {
+        max-width: 100% !important;
+    }
+}

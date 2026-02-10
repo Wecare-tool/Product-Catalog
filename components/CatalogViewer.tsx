@@ -3,6 +3,7 @@ import React, { useRef, useState, useCallback } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import { CatalogPage as CatalogPageType } from '../types';
 import { CatalogPage } from './CatalogPage';
+import { BASE_PAGE_WIDTH, BASE_PAGE_HEIGHT } from '../config';
 
 interface CatalogViewerProps {
   pages: CatalogPageType[];
@@ -31,8 +32,8 @@ export const CatalogViewer: React.FC<CatalogViewerProps> = ({
   currentPage = 1
 }) => {
   // Base dimensions per page (A4 standard at ~72 PPI)
-  const baseWidth = 595;
-  const baseHeight = 842;
+  const baseWidth = BASE_PAGE_WIDTH;
+  const baseHeight = BASE_PAGE_HEIGHT;
 
   const totalWidth = isMobile ? baseWidth : baseWidth * 2;
   const totalHeight = baseHeight;

@@ -1,6 +1,7 @@
 
 import React, { forwardRef, useState, useEffect, useCallback } from 'react';
 import { CatalogPage as CatalogPageType, CatalogItem } from '../types';
+import { WECARE_LOGO } from '../config';
 
 interface CatalogPageProps {
     page: CatalogPageType;
@@ -11,7 +12,6 @@ interface CatalogPageProps {
     isVisible?: boolean; // New prop for virtualization
 }
 
-const WECARE_LOGO = "https://i.imgur.com/tD07Yrv.png";
 
 // Helper component to highlight text
 const HighlightedText: React.FC<{ text: string, term?: string }> = React.memo(({ text, term }) => {
@@ -78,7 +78,7 @@ const GroupHeaderItem: React.FC<{ item: CatalogItem, accessToken?: string | null
 
     return (
         <div className="w-full break-inside-avoid break-after-avoid mb-1 mt-2 first:mt-0 p-2 bg-gray-50 rounded border border-gray-100 flex gap-3 shadow-sm group-header select-text cursor-auto">
-            <div className="w-12 h-12 shrink-0 rounded overflow-hidden bg-white border border-gray-200 select-none">
+            <div className="w-14 h-14 shrink-0 rounded-lg overflow-hidden bg-white border border-gray-200 select-none shadow-sm">
                 <img
                     src={imgSrc || WECARE_LOGO}
                     alt="icon"
@@ -271,7 +271,7 @@ export const CatalogPage = React.memo(forwardRef<HTMLDivElement, CatalogPageProp
                             if (item.type === 'table_header') {
                                 if (item.hasSpecs && !item.hasDiscount) {
                                     return (
-                                        <div key={idx} className="flex bg-wecare-lightBlue text-white text-[10px] font-bold p-1 mb-1 break-inside-avoid rounded-sm">
+                                        <div key={idx} className="flex bg-wecare-darkBlue text-white text-[11px] font-bold p-1 mb-1 break-inside-avoid rounded-sm tracking-wide">
                                             <span className="w-[30%] pl-1">Tên SP</span>
                                             <span className="w-[10%] text-center">ĐVT</span>
                                             <span className="w-[25%] text-left pl-1">Quy cách</span>
@@ -282,7 +282,7 @@ export const CatalogPage = React.memo(forwardRef<HTMLDivElement, CatalogPageProp
                                 }
                                 if (item.hasDiscount) {
                                     return (
-                                        <div key={idx} className="flex bg-wecare-lightBlue text-white text-[10px] font-bold p-1 mb-1 break-inside-avoid rounded-sm">
+                                        <div key={idx} className="flex bg-wecare-darkBlue text-white text-[11px] font-bold p-1 mb-1 break-inside-avoid rounded-sm tracking-wide">
                                             <span className="w-[35%] pl-1">Tên sản phẩm</span>
                                             <span className="w-[10%] text-center">ĐVT</span>
                                             <span className="w-[25%] text-right pr-2">Giá niêm yết</span>
@@ -291,7 +291,7 @@ export const CatalogPage = React.memo(forwardRef<HTMLDivElement, CatalogPageProp
                                     );
                                 }
                                 return (
-                                    <div key={idx} className="flex bg-wecare-lightBlue text-white text-[10px] font-bold p-1 mb-1 break-inside-avoid rounded-sm">
+                                    <div key={idx} className="flex bg-wecare-darkBlue text-white text-[11px] font-bold p-1 mb-1 break-inside-avoid rounded-sm tracking-wide">
                                         <span className="w-[60%] pl-1">Tên sản phẩm</span>
                                         <span className="w-[15%] text-center">ĐVT</span>
                                         <span className="w-[25%] text-right pr-1">Giá</span>
@@ -302,38 +302,38 @@ export const CatalogPage = React.memo(forwardRef<HTMLDivElement, CatalogPageProp
                             if (item.type === 'product') {
                                 if (item.hasSpecs && !item.hasDiscount) {
                                     return (
-                                        <div key={idx} className="flex border-b border-gray-100 py-1 break-inside-avoid text-[11px] font-roboto text-wecare-charcoal leading-tight hover:bg-gray-50 items-start">
-                                            <span className="w-[30%] pl-1 font-medium pr-1">
+                                        <div key={idx} className="flex gap-1 border-b border-gray-100 py-1 break-inside-avoid text-[12px] font-roboto text-wecare-charcoal leading-tight hover:bg-blue-50/40 odd:bg-slate-50 even:bg-white items-start">
+                                            <span className="w-[30%] pl-1 font-medium pr-1 min-w-0 overflow-hidden line-clamp-1" title={item.model || ''}>
                                                 <HighlightedText text={item.model || ''} term={highlightTerm} />
                                             </span>
                                             <span className="w-[10%] text-gray-500 text-center">{item.size}</span>
                                             <span className="w-[25%] text-gray-500 pl-1 pr-1 whitespace-normal">{item.specification || '-'}</span>
                                             <span className="w-[10%] text-gray-500 text-center">{item.moq || '-'}</span>
-                                            <span className="w-[25%] text-right pr-1 font-medium text-wecare-darkBlue">{item.price}</span>
+                                            <span className="w-[25%] text-right pr-1 font-bold text-wecare-darkBlue text-[13px]">{item.price}₫</span>
                                         </div>
                                     );
                                 }
                                 if (item.hasDiscount) {
                                     return (
-                                        <div key={idx} className="flex border-b border-gray-100 py-1 break-inside-avoid text-[11px] font-roboto text-wecare-charcoal leading-tight hover:bg-gray-50 items-center">
-                                            <span className="w-[35%] pl-1 font-medium pr-1">
+                                        <div key={idx} className="flex gap-1 border-b border-gray-100 py-1 break-inside-avoid text-[12px] font-roboto text-wecare-charcoal leading-tight hover:bg-blue-50/40 odd:bg-slate-50 even:bg-white items-center">
+                                            <span className="w-[35%] pl-1 font-medium pr-1 min-w-0 overflow-hidden line-clamp-1" title={item.model || ''}>
                                                 <HighlightedText text={item.model || ''} term={highlightTerm} />
                                             </span>
                                             <span className="w-[10%] text-gray-500 text-center">{item.size}</span>
-                                            <span className="w-[25%] text-right pr-2 text-gray-400 line-through decoration-gray-400">{item.price}</span>
+                                            <span className="w-[25%] text-right pr-2 text-gray-400 line-through decoration-gray-400">{item.price}₫</span>
                                             <span className="w-[30%] text-right pr-1 font-bold text-red-600">
-                                                {item.discountedPrice || item.price}
+                                                {item.discountedPrice || item.price}₫
                                             </span>
                                         </div>
                                     );
                                 }
                                 return (
-                                    <div key={idx} className="flex border-b border-gray-100 py-1 break-inside-avoid text-[11px] font-roboto text-wecare-charcoal leading-tight hover:bg-gray-50 items-start">
-                                        <span className="w-[60%] pl-1 font-medium pr-1">
+                                    <div key={idx} className="flex gap-1 border-b border-gray-100 py-1 break-inside-avoid text-[12px] font-roboto text-wecare-charcoal leading-tight hover:bg-blue-50/40 odd:bg-slate-50 even:bg-white items-start">
+                                        <span className="w-[60%] pl-1 font-medium pr-1 min-w-0 overflow-hidden line-clamp-1" title={item.model || ''}>
                                             <HighlightedText text={item.model || ''} term={highlightTerm} />
                                         </span>
                                         <span className="w-[15%] text-gray-500 text-center">{item.size}</span>
-                                        <span className="w-[25%] text-right pr-1 font-medium text-wecare-darkBlue">{item.price}</span>
+                                        <span className="w-[25%] text-right pr-1 font-bold text-wecare-darkBlue text-[13px]">{item.price}₫</span>
                                     </div>
                                 );
                             }
@@ -342,8 +342,8 @@ export const CatalogPage = React.memo(forwardRef<HTMLDivElement, CatalogPageProp
                     </div>
                 </div>
 
-                <div className="mt-1 pt-1 border-t border-wecare-lightGrey text-[11px] text-wecare-mediumGrey text-center shrink-0">
-                    * Giá đã bao gồm VAT. Liên hệ hotline để có chiết khấu tốt nhất.
+                <div className="mt-1 pt-1 border-t border-wecare-lightGrey text-[11px] text-wecare-mediumGrey text-center shrink-0 flex items-center justify-center gap-1">
+                    <span className="opacity-70">ℹ️</span> Giá đã bao gồm VAT. Liên hệ hotline để có chiết khấu tốt nhất.
                 </div>
             </div>
         );
@@ -358,14 +358,14 @@ export const CatalogPage = React.memo(forwardRef<HTMLDivElement, CatalogPageProp
             <div className={`absolute inset-y-0 w-6 pointer-events-none z-20 opacity-10 bg-gradient-to-r from-black to-transparent left-0`} />
 
             {isOdd ? (
-                <div className="absolute bottom-0 right-0 w-8 h-8 pointer-events-none z-30" style={{
+                <div className="absolute bottom-0 right-0 w-10 h-10 pointer-events-none z-30" style={{
                     background: 'linear-gradient(135deg, transparent 50%, rgba(0,0,0,0.1) 50%, rgba(255,255,255,0.8) 55%, #f1f1f1 100%)',
-                    boxShadow: '-1px -1px 2px rgba(0,0,0,0.05)'
+                    boxShadow: '-1px -1px 3px rgba(0,0,0,0.08)'
                 }} />
             ) : (
-                <div className="absolute bottom-0 left-0 w-8 h-8 pointer-events-none z-30" style={{
+                <div className="absolute bottom-0 left-0 w-10 h-10 pointer-events-none z-30" style={{
                     background: 'linear-gradient(-135deg, transparent 50%, rgba(0,0,0,0.1) 50%, rgba(255,255,255,0.8) 55%, #f1f1f1 100%)',
-                    boxShadow: '1px -1px 2px rgba(0,0,0,0.05)'
+                    boxShadow: '1px -1px 3px rgba(0,0,0,0.08)'
                 }} />
             )}
 

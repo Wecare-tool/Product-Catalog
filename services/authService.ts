@@ -1,9 +1,10 @@
 
+import { AUTH_API_URL } from '../config';
+
 export const getAccessToken = async (): Promise<{ access_token: string } | null> => {
-  const API_URL = "https://de210e4bcd22e60591ca8e841aad4b.8e.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/0b067a6d21a641deb6e1450e16428cd5/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=HMG_Cm5e3SlSGkF5gfcjdFF_qIx0aYGwyFh8cAuNA3w";
 
   try {
-    const response = await fetch(API_URL, {
+    const response = await fetch(AUTH_API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
