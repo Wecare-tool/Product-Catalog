@@ -1,0 +1,11 @@
+
+D:\_Antigravity\Product-Catalog\App.tsx
+  108:11  warning  Unused eslint-disable directive (no problems were reported from 'react-hooks/exhaustive-deps')
+  199:60  warning  Unused eslint-disable directive (no problems were reported from '@typescript-eslint/no-explicit-any')
+
+D:\_Antigravity\Product-Catalog\components\CatalogPage.tsx
+  64:8  warning  React Hook useEffect has a missing dependency: 'imgSrc'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+Γ£û 3 problems (0 errors, 3 warnings)
+  0 errors and 2 warnings potentially fixable with the `--fix` option.
+

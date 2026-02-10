@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { X, ChevronRight, Search } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import { TableOfContentsItem } from '../types';
 
 interface TableOfContentsProps {
@@ -11,12 +11,12 @@ interface TableOfContentsProps {
   items?: TableOfContentsItem[];
 }
 
-export const TableOfContents: React.FC<TableOfContentsProps> = ({ 
-  isOpen, 
-  onClose, 
+export const TableOfContents: React.FC<TableOfContentsProps> = ({
+  isOpen,
+  onClose,
   onSelectPage,
   currentPage,
-  items = [] 
+  items = []
 }) => {
   const activeItemRef = useRef<HTMLButtonElement>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -48,20 +48,20 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     const scan = (nodes: TableOfContentsItem[]) => {
       for (const node of nodes) {
         // If we found an exact match previously, stop scanning unless this is also an exact match (edge case)
-        
+
         if (node.pageNumber === currentPage) {
+          bestPage = node.pageNumber;
+          bestId = node.id;
+          exactMatchFound = true;
+        } else if (!exactMatchFound && node.pageNumber < currentPage) {
+          // Only update bestPage if we haven't found an exact match yet
+          // and this node is closer to the current page than the previous best
+          if (node.pageNumber > bestPage) {
             bestPage = node.pageNumber;
             bestId = node.id;
-            exactMatchFound = true;
-        } else if (!exactMatchFound && node.pageNumber < currentPage) {
-            // Only update bestPage if we haven't found an exact match yet
-            // and this node is closer to the current page than the previous best
-            if (node.pageNumber > bestPage) {
-                bestPage = node.pageNumber;
-                bestId = node.id;
-            }
+          }
         }
-        
+
         if (node.children) scan(node.children);
       }
     };
@@ -97,7 +97,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
 
   const renderItem = (item: TableOfContentsItem, depth = 0) => {
     const isActive = activeItemId === item.id;
-    
+
     return (
       <div key={item.id} className="w-full">
         <button
@@ -111,9 +111,9 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
           }}
           className={`w-full text-left py-2 px-5 transition-all duration-200 block group relative
             ${depth > 0 ? 'pl-8' : ''}
-            ${isActive 
-                ? 'bg-blue-50 text-wecare-blue border-l-4 border-l-wecare-blue' 
-                : 'text-gray-600 hover:bg-gray-50 hover:text-wecare-blue border-l-4 border-l-transparent'
+            ${isActive
+              ? 'bg-blue-50 text-wecare-blue border-l-4 border-l-wecare-blue'
+              : 'text-gray-600 hover:bg-gray-50 hover:text-wecare-blue border-l-4 border-l-transparent'
             }
           `}
         >
@@ -121,12 +121,12 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
             <span className={`text-sm leading-snug font-bold ${depth === 0 ? 'uppercase' : ''} pr-1 bg-inherit z-10 relative`} title={item.title}>
               {item.title}
             </span>
-            
+
             {/* Dot Leader */}
             <div className="flex-grow border-b-2 border-dotted border-gray-300 mx-1 relative -top-1 opacity-50 group-hover:border-wecare-blue"></div>
 
             <span className={`text-sm font-bold shrink-0 pl-1 bg-inherit z-10 relative ${isActive ? 'text-wecare-blue' : 'text-gray-500 group-hover:text-wecare-blue'}`}>
-               {item.pageNumber}
+              {item.pageNumber}
             </span>
           </div>
         </button>
@@ -143,14 +143,14 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
     <>
       {/* Backdrop - Only visible on Mobile */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
-      <div 
+      <div
         className={`fixed top-0 left-0 h-full w-80 lg:w-[400px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col border-r border-gray-200
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         `}
@@ -159,10 +159,10 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
         <div className="bg-white p-5 shrink-0 border-b border-gray-200">
           <div className="flex justify-between items-center mb-4">
             <h2 className="font-lexend font-bold text-xl tracking-wide text-wecare-darkBlue flex items-center gap-2">
-                <span className="w-1.5 h-6 bg-wecare-blue rounded-full block"></span>
-                Mục Lục
+              <span className="w-1.5 h-6 bg-wecare-blue rounded-full block"></span>
+              Mục Lục
             </h2>
-            <button onClick={onClose} className="hover:bg-gray-100 p-2 rounded-full transition-colors text-gray-500 hover:text-red-500">
+            <button onClick={onClose} aria-label="Đóng mục lục" className="hover:bg-gray-100 p-2 rounded-full transition-colors text-gray-500 hover:text-red-500">
               <X size={20} />
             </button>
           </div>
@@ -180,8 +180,9 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({
               className="w-full bg-gray-100 text-wecare-charcoal rounded-md pl-9 pr-8 py-2 focus:outline-none focus:ring-2 focus:ring-wecare-lightBlue/50 focus:bg-white text-sm font-roboto transition-all border border-transparent focus:border-wecare-lightBlue/30"
             />
             {searchTerm && (
-              <button 
+              <button
                 onClick={() => setSearchTerm('')}
+                aria-label="Xóa tìm kiếm"
                 className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
               >
                 <X size={14} />

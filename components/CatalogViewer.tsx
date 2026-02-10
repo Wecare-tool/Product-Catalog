@@ -7,8 +7,9 @@ import { CatalogPage } from './CatalogPage';
 interface CatalogViewerProps {
   pages: CatalogPageType[];
   isMobile: boolean;
-  onFlip: (e: any) => void;
-  bookRef: React.MutableRefObject<any>;
+  onFlip: (e: { data: number }) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  bookRef: React.MutableRefObject<any>; // HTMLFlipBook has no typed ref
   zoomLevel: number;
   onZoomChange?: (zoom: number) => void;
   accessToken?: string | null;
@@ -17,7 +18,7 @@ interface CatalogViewerProps {
   currentPage?: number; // Added to calculate visibility
 }
 
-export const CatalogViewer: React.FC<CatalogViewerProps> = ({ 
+export const CatalogViewer: React.FC<CatalogViewerProps> = ({
   pages,
   isMobile,
   onFlip,
@@ -30,8 +31,8 @@ export const CatalogViewer: React.FC<CatalogViewerProps> = ({
   currentPage = 1
 }) => {
   // Base dimensions per page (A4 standard at ~72 PPI)
-  const baseWidth = 595; 
-  const baseHeight = 842; 
+  const baseWidth = 595;
+  const baseHeight = 842;
 
   const totalWidth = isMobile ? baseWidth : baseWidth * 2;
   const totalHeight = baseHeight;
@@ -62,13 +63,13 @@ export const CatalogViewer: React.FC<CatalogViewerProps> = ({
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       );
-      
+
       const ratio = dist / touchStartDist.current;
       // Clamp zoom level between 0.4 and 2.5
       const newZoom = Math.min(Math.max(startZoomLevel.current * ratio, 0.4), 2.5);
-      
+
       onZoomChange(newZoom);
-      
+
       // Prevent default to avoid native browser zoom/scroll while pinching
       if (e.cancelable) e.preventDefault();
     }
@@ -83,16 +84,16 @@ export const CatalogViewer: React.FC<CatalogViewerProps> = ({
     // Only flip if not zoomed in significantly (to allow scrolling content if zoomed)
     // or if the implementation requires strict page flipping.
     // Here we check if a scroll timeout is active to debounce.
-    
+
     if (scrollTimeout.current) return;
-    
+
     // Threshold to prevent accidental small scrolls
     if (Math.abs(e.deltaY) < 30) return;
 
     // Check availability of bookRef
     if (bookRef.current && bookRef.current.pageFlip()) {
       const flipBook = bookRef.current.pageFlip();
-      
+
       if (e.deltaY > 0) {
         flipBook.flipNext();
       } else {
@@ -108,8 +109,8 @@ export const CatalogViewer: React.FC<CatalogViewerProps> = ({
 
   // VIRTUALIZATION LOGIC
   const isPageVisible = (pageId: number) => {
-      const buffer = 4;
-      return Math.abs(pageId - currentPage) <= buffer;
+    const buffer = 4;
+    return Math.abs(pageId - currentPage) <= buffer;
   };
 
   // DOUBLE CLICK NAVIGATION LOGIC
@@ -118,7 +119,7 @@ export const CatalogViewer: React.FC<CatalogViewerProps> = ({
     // If text is selected, DO NOT flip the page.
     const selection = window.getSelection();
     if (selection && selection.toString().trim().length > 0) {
-        return;
+      return;
     }
 
     if (!bookRef.current) return;
@@ -131,14 +132,14 @@ export const CatalogViewer: React.FC<CatalogViewerProps> = ({
 
     // 2. Determine direction based on click position relative to screen center
     if (clientX > windowWidth / 2) {
-        flipObject.flipNext();
+      flipObject.flipNext();
     } else {
-        flipObject.flipPrev();
+      flipObject.flipPrev();
     }
   };
 
   return (
-    <div 
+    <div
       style={{
         width: `${totalWidth * zoomLevel}px`,
         height: `${totalHeight * zoomLevel}px`,
@@ -158,7 +159,7 @@ export const CatalogViewer: React.FC<CatalogViewerProps> = ({
           transformOrigin: 'top left',
           width: `${totalWidth}px`,
           height: `${totalHeight}px`,
-          willChange: 'transform' 
+          willChange: 'transform'
         }}
         className={`${isPinching ? '' : 'transition-transform duration-300 ease-out'}`}
       >
@@ -170,7 +171,7 @@ export const CatalogViewer: React.FC<CatalogViewerProps> = ({
           maxWidth={2000}
           minHeight={400}
           maxHeight={2000}
-          maxShadowOpacity={0.5} 
+          maxShadowOpacity={0.5}
           showCover={true}
           mobileScrollSupport={true}
           className="demo-book"
@@ -186,17 +187,17 @@ export const CatalogViewer: React.FC<CatalogViewerProps> = ({
           startZIndex={0}
           autoSize={true}
           clickEventForward={true}
-          showPageCorners={false} 
-          disableFlipByClick={true} 
+          showPageCorners={false}
+          disableFlipByClick={true}
         >
           {pages.map((page) => (
-            <CatalogPage 
-                key={page.id} 
-                page={page} 
-                accessToken={accessToken} 
-                onPageClick={onPageClick}
-                highlightTerm={highlightTerm}
-                isVisible={isPageVisible(page.id)}
+            <CatalogPage
+              key={page.id}
+              page={page}
+              accessToken={accessToken}
+              onPageClick={onPageClick}
+              highlightTerm={highlightTerm}
+              isVisible={isPageVisible(page.id)}
             />
           ))}
         </HTMLFlipBook>

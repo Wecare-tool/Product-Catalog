@@ -5,7 +5,7 @@ export interface CatalogItem {
   type: CatalogItemType;
   // Common fields
   id?: string;
-  
+
   // Product fields
   model?: string;
   size?: string; // Unit
@@ -13,7 +13,7 @@ export interface CatalogItem {
   discountedPrice?: string; // New: Giá ưu đãi
   specification?: string; // New: Quy cách
   moq?: string;           // New: MOQ
-  
+
   // Group Header fields
   title?: string;
   count?: number;
@@ -22,12 +22,12 @@ export interface CatalogItem {
 
   // TOC specific
   pageReference?: number;
-  
+
   // Layout weighting
   weight?: number;
 
   // Flag to trigger detailed layout
-  hasSpecs?: boolean; 
+  hasSpecs?: boolean;
   hasDiscount?: boolean; // New: Flag to trigger discount column
 }
 
@@ -38,13 +38,14 @@ export interface CatalogPage {
   content?: string;
   section: string;
   type: 'standard' | 'table' | 'cover';
-  columnLayout?: 'single' | 'double'; 
-  
+  columnLayout?: 'single' | 'double';
+
   // Replaced tableRows with polymorphic items for flexible layout
   items?: CatalogItem[];
-  
+
   // Legacy support optional if needed, but we will migrate away
-  tableRows?: any[]; 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tableRows?: any[]; // Legacy support
 }
 
 export interface TableOfContentsItem {
@@ -94,7 +95,7 @@ export interface CRMProduct {
   "crdfd_nhommargin@OData.Community.Display.V1.FormattedValue"?: string; // Formatted Value
   "cr1bb_giakhongvat"?: number; // Price without VAT used for discount calculation
   "cr1bb_gtgt"?: number; // VAT rate (e.g., 0.08, 0.1)
-  
+
   // Fields joined from crdfd_products table
   "crdfd_manhomsp"?: string;
   "cr1bb_imageurl"?: string;
@@ -104,19 +105,20 @@ export interface CRMProduct {
   "statecode"?: number;
   "crdfd_trangthaihieuluc"?: number;
   "crdfd_pricingdeactive"?: number;
-  
+
   // Enriched Data (Added via code)
   "enriched_description"?: string;
   "enriched_group_id"?: string;
   "enriched_industry_id"?: string; // ID for Water/Electric/Metal filtering
   "enriched_group_image"?: string; // Calculated image (Group File OR Random Product Image)
   "enriched_group_type"?: string; // From cr1bb_nhomhang (e.g. "Margin builder product")
-  
+
   // New Specification Data
   "enriched_specification"?: string;
   "enriched_moq"?: number;
   "enriched_spec_unit"?: string; // Unit from Spec table might differ
 
   // Catch-all for other props
-  [key: string]: any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any; // Dynamic OData annotation keys
 }

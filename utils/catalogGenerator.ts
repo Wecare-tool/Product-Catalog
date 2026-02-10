@@ -1,7 +1,7 @@
 
 import { CatalogPage, TableOfContentsItem, CRMProduct, CatalogItem, CRMCustomer } from '../types';
 
-const FALLBACK_LOGO = "https://i.imgur.com/tD07Yrv.png";
+
 
 const STATIC_IMAGES = {
     cover: "https://image2url.com/images/1765513580412-dc31c3b9-944d-4f96-b44a-4a85216efb77.jpg",
@@ -26,8 +26,8 @@ const getFallbackGroupImage = (groupName: string): string => {
 };
 
 // --- CONFIGURATION ---
-const MAX_WEIGHT_PER_PAGE = 48; 
-const ITEMS_PER_TOC_PAGE = 80; 
+const MAX_WEIGHT_PER_PAGE = 48;
+const ITEMS_PER_TOC_PAGE = 80;
 const WEIGHTS = {
     PRODUCT_ROW: 1.0,   // Standard row
     TABLE_HEADER: 2.0,  // Reduced header weight
@@ -106,7 +106,7 @@ const calculateDiscountedPrice = (product: CRMProduct, customer: CRMCustomer | n
     // 1. Get Reward Tier
     const rewardVal = customer["crdfd_wecare_rewards@OData.Community.Display.V1.FormattedValue"] || customer.crdfd_wecare_rewards;
     const tier = normalizeReward(typeof rewardVal === 'string' ? rewardVal : '');
-    
+
     if (!tier || !DISCOUNT_RATES[tier]) return null;
 
     // 2. Get Margin Group
@@ -126,210 +126,210 @@ const calculateDiscountedPrice = (product: CRMProduct, customer: CRMCustomer | n
     // 5. Calculate
     // (PriceNoVAT - (PriceNoVAT * Rate)) * (1 + VAT)
     const discounted = (priceNoVat - (priceNoVat * rate)) * (1 + vatRate);
-    
+
     return Math.round(discounted);
 };
 
 
 export const generatePagesFromData = (products: CRMProduct[], filter: string = 'all', selectedCustomer: CRMCustomer | null = null) => {
-  // --- 1. PREPARE DATA GROUPS ---
-  const groupedProducts: Record<string, { products: CRMProduct[], desc: string, groupImage?: string }> = {};
-  
-  // Single pass loop
-  for (const p of products) {
-    const groupName = p["_cr1bb_nhomsanpham_value@OData.Community.Display.V1.FormattedValue"] || p["cr1bb_nhomsanpham"] || "Sản phẩm khác";
-    if (!groupedProducts[groupName]) {
-      groupedProducts[groupName] = { 
-          products: [],
-          desc: p.enriched_description || "Sản phẩm chất lượng cao từ Wecare.",
-          groupImage: p.enriched_group_image 
-      };
-    }
-    groupedProducts[groupName].products.push(p);
-  }
+    // --- 1. PREPARE DATA GROUPS ---
+    const groupedProducts: Record<string, { products: CRMProduct[], desc: string, groupImage?: string }> = {};
 
-  const sortedGroups = Object.keys(groupedProducts).sort((a, b) => a.localeCompare(b, 'vi'));
-
-  // --- 2. GENERATE CONTENT PAGES (Intermediate Step) ---
-  let contentPages: Omit<CatalogPage, 'id'>[] = [];
-  let currentPageItems: CatalogItem[] = [];
-  let currentLoad = 0;
-  
-  const flushPage = () => {
-      if (currentPageItems.length === 0) return;
-      contentPages.push({
-          title: "Danh mục sản phẩm", 
-          section: "Danh mục",
-          type: 'table',
-          columnLayout: 'double',
-          items: [...currentPageItems]
-      });
-      currentPageItems = [];
-      currentLoad = 0;
-  };
-
-  // Define flag to check if we should apply discount logic (Only for Metal)
-  const shouldApplyDiscount = filter === 'metal';
-
-  for (const groupName of sortedGroups) {
-      const groupData = groupedProducts[groupName];
-      
-      const groupProducts = groupData.products.sort((a, b) => {
-        const nameA = a["_crdfd_sanpham_value@OData.Community.Display.V1.FormattedValue"] || "";
-        const nameB = b["_crdfd_sanpham_value@OData.Community.Display.V1.FormattedValue"] || "";
-        
-        // Custom sort for 'Pát ke Góc' using hoisted Regex
-        if (groupName.toLowerCase().includes('pát ke góc') || groupName.toLowerCase().includes('pat ke goc')) {
-            const getNum = (s: string) => {
-                const match = s.match(NUMBER_REGEX);
-                return match ? parseInt(match[1], 10) : 0;
+    // Single pass loop
+    for (const p of products) {
+        const groupName = p["_cr1bb_nhomsanpham_value@OData.Community.Display.V1.FormattedValue"] || p["cr1bb_nhomsanpham"] || "Sản phẩm khác";
+        if (!groupedProducts[groupName]) {
+            groupedProducts[groupName] = {
+                products: [],
+                desc: p.enriched_description || "Sản phẩm chất lượng cao từ Wecare.",
+                groupImage: p.enriched_group_image
             };
-            const numA = getNum(nameA);
-            const numB = getNum(nameB);
-            
-            if (numA !== 0 || numB !== 0) {
-                 if (numA !== numB) return numA - numB;
-            }
         }
-        return nameA.localeCompare(nameB, 'vi', { numeric: true });
-      });
+        groupedProducts[groupName].products.push(p);
+    }
 
-      const groupImage = groupData.groupImage || getFallbackGroupImage(groupName);
-      
-      const groupHasSpecs = groupProducts.some(p => 
-          (p.enriched_specification && p.enriched_specification.trim() !== '') || 
-          (p.enriched_moq && p.enriched_moq > 0)
-      );
+    const sortedGroups = Object.keys(groupedProducts).sort((a, b) => a.localeCompare(b, 'vi'));
 
-      // Check if this group generates any discount prices
-      const groupHasDiscount = shouldApplyDiscount && selectedCustomer && groupProducts.some(p => {
-         // Add condition: Group Type must be 'Margin builder product'
-         if (!p.enriched_group_type || !p.enriched_group_type.toLowerCase().includes('margin builder product')) return false;
-         
-         // Fail fast optimization: if calculateDiscountedPrice returns non-null, we stop
-         const dPrice = calculateDiscountedPrice(p, selectedCustomer);
-         return dPrice !== null;
-      });
+    // --- 2. GENERATE CONTENT PAGES (Intermediate Step) ---
+    const contentPages: Omit<CatalogPage, 'id'>[] = [];
+    let currentPageItems: CatalogItem[] = [];
+    let currentLoad = 0;
 
-      const MIN_REQUIRED_ROWS = 1; 
-      const spaceRequiredForHeader = WEIGHTS.GROUP_HEADER + WEIGHTS.TABLE_HEADER + (MIN_REQUIRED_ROWS * WEIGHTS.PRODUCT_ROW);
-      
-      if (currentLoad + spaceRequiredForHeader > MAX_WEIGHT_PER_PAGE) {
-          flushPage();
-      }
+    const flushPage = () => {
+        if (currentPageItems.length === 0) return;
+        contentPages.push({
+            title: "Danh mục sản phẩm",
+            section: "Danh mục",
+            type: 'table',
+            columnLayout: 'double',
+            items: [...currentPageItems]
+        });
+        currentPageItems = [];
+        currentLoad = 0;
+    };
 
-      // Add Group Header
-      currentPageItems.push({
-          type: 'group_header',
-          title: groupName, 
-          count: groupProducts.length,
-          image: groupImage,
-          desc: groupData.desc,
-          weight: WEIGHTS.GROUP_HEADER
-      });
-      
-      // Add Table Header
-      currentPageItems.push({ 
-          type: 'table_header', 
-          weight: WEIGHTS.TABLE_HEADER,
-          hasSpecs: groupHasSpecs,
-          hasDiscount: !!groupHasDiscount
-      });
-      
-      currentLoad += (WEIGHTS.GROUP_HEADER + WEIGHTS.TABLE_HEADER);
+    // Define flag to check if we should apply discount logic (Only for Metal)
+    const shouldApplyDiscount = filter === 'metal';
 
-      // Add Products
-      for (const p of groupProducts) {
-           const name = p["_crdfd_sanpham_value@OData.Community.Display.V1.FormattedValue"] || "Sản phẩm không tên";
-           const unit = p["crdfd_onvichuan"] || p.enriched_spec_unit || "-";
-           
-           let price = "Liên hệ";
-           if (p["crdfd_gia"] !== undefined && p["crdfd_gia"] !== null) {
+    for (const groupName of sortedGroups) {
+        const groupData = groupedProducts[groupName];
+
+        const groupProducts = groupData.products.sort((a, b) => {
+            const nameA = a["_crdfd_sanpham_value@OData.Community.Display.V1.FormattedValue"] || "";
+            const nameB = b["_crdfd_sanpham_value@OData.Community.Display.V1.FormattedValue"] || "";
+
+            // Custom sort for 'Pát ke Góc' using hoisted Regex
+            if (groupName.toLowerCase().includes('pát ke góc') || groupName.toLowerCase().includes('pat ke goc')) {
+                const getNum = (s: string) => {
+                    const match = s.match(NUMBER_REGEX);
+                    return match ? parseInt(match[1], 10) : 0;
+                };
+                const numA = getNum(nameA);
+                const numB = getNum(nameB);
+
+                if (numA !== 0 || numB !== 0) {
+                    if (numA !== numB) return numA - numB;
+                }
+            }
+            return nameA.localeCompare(nameB, 'vi', { numeric: true });
+        });
+
+        const groupImage = groupData.groupImage || getFallbackGroupImage(groupName);
+
+        const groupHasSpecs = groupProducts.some(p =>
+            (p.enriched_specification && p.enriched_specification.trim() !== '') ||
+            (p.enriched_moq && p.enriched_moq > 0)
+        );
+
+        // Check if this group generates any discount prices
+        const groupHasDiscount = shouldApplyDiscount && selectedCustomer && groupProducts.some(p => {
+            // Add condition: Group Type must be 'Margin builder product'
+            if (!p.enriched_group_type || !p.enriched_group_type.toLowerCase().includes('margin builder product')) return false;
+
+            // Fail fast optimization: if calculateDiscountedPrice returns non-null, we stop
+            const dPrice = calculateDiscountedPrice(p, selectedCustomer);
+            return dPrice !== null;
+        });
+
+        const MIN_REQUIRED_ROWS = 1;
+        const spaceRequiredForHeader = WEIGHTS.GROUP_HEADER + WEIGHTS.TABLE_HEADER + (MIN_REQUIRED_ROWS * WEIGHTS.PRODUCT_ROW);
+
+        if (currentLoad + spaceRequiredForHeader > MAX_WEIGHT_PER_PAGE) {
+            flushPage();
+        }
+
+        // Add Group Header
+        currentPageItems.push({
+            type: 'group_header',
+            title: groupName,
+            count: groupProducts.length,
+            image: groupImage,
+            desc: groupData.desc,
+            weight: WEIGHTS.GROUP_HEADER
+        });
+
+        // Add Table Header
+        currentPageItems.push({
+            type: 'table_header',
+            weight: WEIGHTS.TABLE_HEADER,
+            hasSpecs: groupHasSpecs,
+            hasDiscount: !!groupHasDiscount
+        });
+
+        currentLoad += (WEIGHTS.GROUP_HEADER + WEIGHTS.TABLE_HEADER);
+
+        // Add Products
+        for (const p of groupProducts) {
+            const name = p["_crdfd_sanpham_value@OData.Community.Display.V1.FormattedValue"] || "Sản phẩm không tên";
+            const unit = p["crdfd_onvichuan"] || p.enriched_spec_unit || "-";
+
+            let price = "Liên hệ";
+            if (p["crdfd_gia"] !== undefined && p["crdfd_gia"] !== null) {
                 // Use Cached Formatter
                 price = currencyFormatter.format(p["crdfd_gia"]);
-           } else if (p["crdfd_gia@OData.Community.Display.V1.FormattedValue"]) {
-                 price = p["crdfd_gia@OData.Community.Display.V1.FormattedValue"].replace(/\.00$/, '').replace(/\.00\s?₫?$/, '');
-           }
+            } else if (p["crdfd_gia@OData.Community.Display.V1.FormattedValue"]) {
+                price = p["crdfd_gia@OData.Community.Display.V1.FormattedValue"].replace(/\.00$/, '').replace(/\.00\s?₫?$/, '');
+            }
 
-           // CALC DISCOUNT PRICE
-           let discountPriceStr: string | undefined = undefined;
-           
-           // Apply Discount logic only if Metal AND Margin builder product
-           if (shouldApplyDiscount && p.enriched_group_type && p.enriched_group_type.toLowerCase().includes('margin builder product')) {
+            // CALC DISCOUNT PRICE
+            let discountPriceStr: string | undefined = undefined;
+
+            // Apply Discount logic only if Metal AND Margin builder product
+            if (shouldApplyDiscount && p.enriched_group_type && p.enriched_group_type.toLowerCase().includes('margin builder product')) {
                 const discountVal = calculateDiscountedPrice(p, selectedCustomer);
                 if (discountVal !== null) {
                     discountPriceStr = currencyFormatter.format(discountVal);
                 }
-           }
+            }
 
-           let rowWeight = WEIGHTS.PRODUCT_ROW;
-           const nameLen = name.length;
-           const specLen = p.enriched_specification ? p.enriched_specification.length : 0;
-           
-           if (nameLen > 50) rowWeight += 0.4; 
-           if (nameLen > 90) rowWeight += 0.4;
+            let rowWeight = WEIGHTS.PRODUCT_ROW;
+            const nameLen = name.length;
+            const specLen = p.enriched_specification ? p.enriched_specification.length : 0;
 
-           if (groupHasSpecs && p.enriched_specification) {
-               if (specLen > 50) rowWeight += 0.3;
-               if (specLen > 90) rowWeight += 0.3;
-           }
+            if (nameLen > 50) rowWeight += 0.4;
+            if (nameLen > 90) rowWeight += 0.4;
 
-           const item: CatalogItem = {
-               type: 'product',
-               model: name,
-               size: unit,
-               price: price,
-               discountedPrice: discountPriceStr,
-               weight: rowWeight,
-               specification: p.enriched_specification,
-               moq: p.enriched_moq ? p.enriched_moq.toString() : undefined,
-               hasSpecs: groupHasSpecs,
-               hasDiscount: !!groupHasDiscount
-           };
+            if (groupHasSpecs && p.enriched_specification) {
+                if (specLen > 50) rowWeight += 0.3;
+                if (specLen > 90) rowWeight += 0.3;
+            }
 
-           if (currentLoad + item.weight! > MAX_WEIGHT_PER_PAGE) {
-               flushPage();
-               currentPageItems.push({ 
-                   type: 'table_header', 
-                   weight: WEIGHTS.TABLE_HEADER,
-                   hasSpecs: groupHasSpecs,
-                   hasDiscount: !!groupHasDiscount
-               });
-               currentLoad += WEIGHTS.TABLE_HEADER;
-           }
+            const item: CatalogItem = {
+                type: 'product',
+                model: name,
+                size: unit,
+                price: price,
+                discountedPrice: discountPriceStr,
+                weight: rowWeight,
+                specification: p.enriched_specification,
+                moq: p.enriched_moq ? p.enriched_moq.toString() : undefined,
+                hasSpecs: groupHasSpecs,
+                hasDiscount: !!groupHasDiscount
+            };
 
-           currentPageItems.push(item);
-           currentLoad += item.weight!;
-      }
-  }
-  flushPage(); 
+            if (currentLoad + item.weight! > MAX_WEIGHT_PER_PAGE) {
+                flushPage();
+                currentPageItems.push({
+                    type: 'table_header',
+                    weight: WEIGHTS.TABLE_HEADER,
+                    hasSpecs: groupHasSpecs,
+                    hasDiscount: !!groupHasDiscount
+                });
+                currentLoad += WEIGHTS.TABLE_HEADER;
+            }
 
-  // --- 3. ASSEMBLE FINAL PAGES WITH POST-CALCULATED IDs ---
-  const finalPages: CatalogPage[] = [];
+            currentPageItems.push(item);
+            currentLoad += item.weight!;
+        }
+    }
+    flushPage();
 
-  // 3a. Cover (ID 1)
-  let coverImage = COVER_IMAGES.default;
-  if (filter === 'electric') coverImage = COVER_IMAGES.electric;
-  else if (filter === 'water') coverImage = COVER_IMAGES.water;
-  else if (filter === 'metal') coverImage = COVER_IMAGES.metal;
+    // --- 3. ASSEMBLE FINAL PAGES WITH POST-CALCULATED IDs ---
+    const finalPages: CatalogPage[] = [];
 
-  finalPages.push({
-      id: 0, 
-      title: "Bảng Giá Vật Tư Wecare 2026",
-      section: "Trang bìa",
-      type: 'cover',
-      image: coverImage,
-      content: ""
-  });
+    // 3a. Cover (ID 1)
+    let coverImage = COVER_IMAGES.default;
+    if (filter === 'electric') coverImage = COVER_IMAGES.electric;
+    else if (filter === 'water') coverImage = COVER_IMAGES.water;
+    else if (filter === 'metal') coverImage = COVER_IMAGES.metal;
 
-  // 3b. Intro (ID 2)
-  finalPages.push({
-      id: 0,
-      title: "Giới thiệu chung",
-      section: "Giới thiệu",
-      type: 'standard',
-      image: STATIC_IMAGES.intro,
-      content: `Cung cấp giải pháp cung ứng vật tư, nguyên vật liệu, phụ kiện cho nhà máy, ngành công nghiệp.
+    finalPages.push({
+        id: 0,
+        title: "Bảng Giá Vật Tư Wecare 2026",
+        section: "Trang bìa",
+        type: 'cover',
+        image: coverImage,
+        content: ""
+    });
+
+    // 3b. Intro (ID 2)
+    finalPages.push({
+        id: 0,
+        title: "Giới thiệu chung",
+        section: "Giới thiệu",
+        type: 'standard',
+        image: STATIC_IMAGES.intro,
+        content: `Cung cấp giải pháp cung ứng vật tư, nguyên vật liệu, phụ kiện cho nhà máy, ngành công nghiệp.
 
 Trụ sở 1:
 14-16-18-20, Đường 36, P. Bình Phú, Q6, HCM
@@ -340,88 +340,88 @@ Lô B39, Khu Công nghiệp Phú Tài, Phường Quy Nhơn Bắc, Tỉnh Gia Lai
 📞 +84 378 339 009
 
 Email: support@wecare.com.vn`
-  });
+    });
 
-  // 3c. Reserve TOC Pages
-  const numTocPages = Math.ceil(sortedGroups.length / ITEMS_PER_TOC_PAGE) || 1;
-  const tocPageIndices: number[] = [];
-  
-  for (let i = 0; i < numTocPages; i++) {
-      tocPageIndices.push(finalPages.length); 
-      finalPages.push({
-          id: 0,
-          title: i === 0 ? "Mục Lục" : "Mục Lục (tiếp)",
-          section: "Mục lục",
-          type: 'table',
-          columnLayout: 'double',
-          items: [] 
-      });
-  }
+    // 3c. Reserve TOC Pages
+    const numTocPages = Math.ceil(sortedGroups.length / ITEMS_PER_TOC_PAGE) || 1;
+    const tocPageIndices: number[] = [];
 
-  // 3d. Add Content Pages
-  contentPages.forEach(p => finalPages.push({ ...p, id: 0 }));
+    for (let i = 0; i < numTocPages; i++) {
+        tocPageIndices.push(finalPages.length);
+        finalPages.push({
+            id: 0,
+            title: i === 0 ? "Mục Lục" : "Mục Lục (tiếp)",
+            section: "Mục lục",
+            type: 'table',
+            columnLayout: 'double',
+            items: []
+        });
+    }
 
-  // 3e. Appendix
-  finalPages.push({
-      id: 0,
-      title: "Phụ lục",
-      section: "Kết thúc",
-      type: 'standard',
-      image: STATIC_IMAGES.appendix,
-      content: "Cảm ơn quý khách đã xem bảng giá Wecare."
-  });
+    // 3d. Add Content Pages
+    contentPages.forEach(p => finalPages.push({ ...p, id: 0 }));
 
-  // --- PASS 2: ASSIGN IDs & MAP CONTENT ---
-  const groupPageMap: Record<string, number> = {};
+    // 3e. Appendix
+    finalPages.push({
+        id: 0,
+        title: "Phụ lục",
+        section: "Kết thúc",
+        type: 'standard',
+        image: STATIC_IMAGES.appendix,
+        content: "Cảm ơn quý khách đã xem bảng giá Wecare."
+    });
 
-  finalPages.forEach((page, index) => {
-      page.id = index + 1; 
-      
-      if (page.items) {
-          page.items.forEach(item => {
-              if (item.type === 'group_header' && item.title) {
-                  if (!groupPageMap[item.title]) {
-                      groupPageMap[item.title] = page.id;
-                  }
-              }
-          });
-      }
-  });
+    // --- PASS 2: ASSIGN IDs & MAP CONTENT ---
+    const groupPageMap: Record<string, number> = {};
 
-  // --- PASS 3: POPULATE TOC PAGES & SIDEBAR ---
-  const sidebarToc: TableOfContentsItem[] = [
-      { id: 'cover', title: 'Trang bìa', pageNumber: 1 },
-      { id: 'intro', title: 'Giới thiệu', pageNumber: 2 },
-  ];
-  if (tocPageIndices.length > 0) {
-      sidebarToc.push({ id: 'toc', title: 'Mục lục', pageNumber: tocPageIndices[0] + 1 });
-  }
+    finalPages.forEach((page, index) => {
+        page.id = index + 1;
 
-  // Update TOC Pages content
-  tocPageIndices.forEach((pageIndex, i) => {
-      const startIdx = i * ITEMS_PER_TOC_PAGE;
-      const endIdx = startIdx + ITEMS_PER_TOC_PAGE;
-      const entries = sortedGroups.slice(startIdx, endIdx);
-      
-      const items: CatalogItem[] = entries.map((name, idxInPage) => ({
-          type: 'toc_entry',
-          title: `${startIdx + idxInPage + 1}. ${name}`,
-          pageReference: groupPageMap[name] || finalPages[finalPages.length-1].id 
-      }));
-      
-      finalPages[pageIndex].items = items;
-  });
+        if (page.items) {
+            page.items.forEach(item => {
+                if (item.type === 'group_header' && item.title) {
+                    if (!groupPageMap[item.title]) {
+                        groupPageMap[item.title] = page.id;
+                    }
+                }
+            });
+        }
+    });
 
-  // Populate Sidebar
-  sortedGroups.forEach((name, idx) => {
-      sidebarToc.push({
-          id: `group_${idx}`,
-          title: `${idx + 1}. ${name}`,
-          pageNumber: groupPageMap[name] || finalPages[finalPages.length-1].id
-      });
-  });
+    // --- PASS 3: POPULATE TOC PAGES & SIDEBAR ---
+    const sidebarToc: TableOfContentsItem[] = [
+        { id: 'cover', title: 'Trang bìa', pageNumber: 1 },
+        { id: 'intro', title: 'Giới thiệu', pageNumber: 2 },
+    ];
+    if (tocPageIndices.length > 0) {
+        sidebarToc.push({ id: 'toc', title: 'Mục lục', pageNumber: tocPageIndices[0] + 1 });
+    }
 
-  sidebarToc.push({ id: 'end', title: 'Kết thúc', pageNumber: finalPages[finalPages.length - 1].id });
+    // Update TOC Pages content
+    tocPageIndices.forEach((pageIndex, i) => {
+        const startIdx = i * ITEMS_PER_TOC_PAGE;
+        const endIdx = startIdx + ITEMS_PER_TOC_PAGE;
+        const entries = sortedGroups.slice(startIdx, endIdx);
 
-  return { pages: finalPages, toc: sidebarToc };
+        const items: CatalogItem[] = entries.map((name, idxInPage) => ({
+            type: 'toc_entry',
+            title: `${startIdx + idxInPage + 1}. ${name}`,
+            pageReference: groupPageMap[name] || finalPages[finalPages.length - 1].id
+        }));
+
+        finalPages[pageIndex].items = items;
+    });
+
+    // Populate Sidebar
+    sortedGroups.forEach((name, idx) => {
+        sidebarToc.push({
+            id: `group_${idx}`,
+            title: `${idx + 1}. ${name}`,
+            pageNumber: groupPageMap[name] || finalPages[finalPages.length - 1].id
+        });
+    });
+
+    sidebarToc.push({ id: 'end', title: 'Kết thúc', pageNumber: finalPages[finalPages.length - 1].id });
+
+    return { pages: finalPages, toc: sidebarToc };
 };
